@@ -1,0 +1,10 @@
+blockchains:
+  book-review:
+    module: main
+compile:
+  rellVersion: 0.13.5
+database:
+  schema: schema_book_review
+test:
+  modules:
+    - test

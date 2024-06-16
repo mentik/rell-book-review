@@ -1,0 +1,40 @@
+@test module;
+
+import main.*;
+
+function test_add_book(){
+    rell.test.tx()
+        .op(create_book("0001", "Learning Rell for Beginners", "Mentik"))
+        .op(create_book("0002", "Building Rell UI for Beginners", "Mentik"))
+        .run();
+    
+    val all_books = book @* { };
+
+    assert_equals(all_books.size(), 2);
+    assert_equals(all_books[0].title, "Learning Rell for Beginners");
+    assert_equals(all_books[0].author, "Mentik");
+}
+
+function test_add_book_review() {
+    rell.test.tx()
+        .op(create_book("0001", "Learning Rell for Beginners", "Mentik"))
+        .op(create_book_review("0001", "Erna", "Great book for beginners", 5))
+        .op(create_book_review("0001", "Viani", "Great book for beginners", 5))
+        .run();
+
+    val reviews = book_review @* { };
+    val book = book @ { .isbn == "0001" };
+
+    assert_equals(reviews.size(), 2);
+    assert_equals(book, reviews[0].book);
+    assert_equals(reviews[0].reviewer_name, "Erna");
+    assert_equals(reviews[0].review, "Great book for beginners");
+    assert_equals(reviews[0].rating, 5);
+}
+
+function test_add_book_review_for_missing_book() {
+    rell.test.tx()
+        .op(create_book_review("N/A", "Mentik", "Great book", 4))
+        .run_must_fail("Book with ISBN N/A not found");
+}
+

@@ -1,0 +1,55 @@
+module;
+
+/* 
+ Book entity. 
+ */
+entity book {
+    key isbn : text;
+    title: text;
+    author: text;
+}
+
+// Book operations.
+operation create_book(isbn: text, title: text, author: text){
+    create book(isbn=isbn, title=title, author=author);
+}
+
+// Book queries.
+query get_all_books(){
+    return book @* { } (
+        .isbn,
+        .title,
+        .author
+    );
+}
+
+/* 
+ Review entity. 
+ */
+entity book_review {
+    index book: book;
+    reviewer_name: text;
+    review: text;
+    rating: integer;
+}
+
+// Review operations.
+operation create_book_review(isbn: text, reviewer_name: text, review: text, rating: integer){
+    val book = require(book @? { .isbn ==  isbn }, "Book with ISBN %s not found".format(isbn));
+    create book_review(
+        book,
+        reviewer_name,
+        review,
+        rating
+    );
+}
+
+// Review queries.
+query get_all_reviews_for_book(isbn: text){
+    val reviews = book_review @* { .book.isbn == isbn} (
+        .reviewer_name,
+        .review,
+        .rating
+    );
+    return reviews;
+}
